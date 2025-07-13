@@ -1,27 +1,28 @@
 'use client'
 
 import { useRef } from 'react'
+import { motion } from 'framer-motion'
 
 export default function EntrepreneurCarousel({ entrepreneurs }) {
   const scrollRef = useRef(null)
 
   const scrollLeft = () => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollBy({ left: -300, behavior: 'smooth' })
-    }
+    scrollRef.current?.scrollBy({ left: -300, behavior: 'smooth' })
   }
 
   const scrollRight = () => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollBy({ left: 300, behavior: 'smooth' })
-    }
+    scrollRef.current?.scrollBy({ left: 300, behavior: 'smooth' })
   }
 
-  // Si solo hay un emprendedor, mostrarlo de forma destacada (ocupando todo el ancho)
   if (entrepreneurs.length === 1) {
     const single = entrepreneurs[0]
     return (
-      <div className="w-full max-w-5xl mx-auto flex justify-center items-center py-4">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: false }}
+        className="w-full max-w-5xl mx-auto flex justify-center items-center py-4"
+      >
         <div className="w-full bg-gray-100 rounded shadow p-4 flex flex-col items-center">
           <img
             src={single.logo_url || '/placeholder.jpg'}
@@ -30,14 +31,12 @@ export default function EntrepreneurCarousel({ entrepreneurs }) {
           />
           <h4 className="text-lg font-semibold text-[#002147]">{single.name}</h4>
         </div>
-      </div>
+      </motion.div>
     )
   }
 
-  // Si hay más de uno, mostrar el carrusel horizontal
   return (
     <div className="relative w-full max-w-5xl mx-auto">
-      {/* Botón Izquierdo */}
       {entrepreneurs.length > 2 && (
         <button
           onClick={scrollLeft}
@@ -53,9 +52,13 @@ export default function EntrepreneurCarousel({ entrepreneurs }) {
         className="flex gap-4 overflow-x-auto no-scrollbar py-2 px-6"
       >
         {entrepreneurs.map((e) => (
-          <div
+          <motion.div
             key={e.id}
             className="min-w-[200px] flex-shrink-0 bg-gray-100 rounded shadow p-4 flex flex-col items-center justify-center"
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.4 }}
+            viewport={{ once: false }}
           >
             <img
               src={e.logo_url || '/placeholder.jpg'}
@@ -65,11 +68,10 @@ export default function EntrepreneurCarousel({ entrepreneurs }) {
             <h4 className="text-center text-sm font-semibold text-[#002147]">
               {e.name}
             </h4>
-          </div>
+          </motion.div>
         ))}
       </div>
 
-      {/* Botón Derecho */}
       {entrepreneurs.length > 2 && (
         <button
           onClick={scrollRight}

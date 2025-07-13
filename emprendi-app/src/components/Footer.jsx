@@ -8,7 +8,7 @@ export default function Footer() {
         Conectando talentos de la Universidad de Oriente
       </p>
       <p className="text-xs text-gray-400 mt-4">
-        Desarrollado por Cristh © {new Date().getFullYear()}
+        Desarrollado por Cristh © 2025
       </p>
     </footer>
   )

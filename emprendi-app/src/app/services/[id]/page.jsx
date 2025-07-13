@@ -1,11 +1,13 @@
 'use client'
 
 import Link from 'next/link'
+import { use } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useEffect, useState } from 'react'
+import { motion } from 'framer-motion'
 
 export default function ServicePage({ params }) {
-  const { id } = params
+  const { id } = use(params)
   const [service, setService] = useState(null)
   const [error, setError] = useState(null)
 
@@ -38,23 +40,33 @@ export default function ServicePage({ params }) {
   }, [id])
 
   if (error) {
-    return <p className="p-4 text-red-500">{error}</p>
+    return <p className="p-6 text-red-500">{error}</p>
   }
 
   if (!service) {
-    return <p className="p-4 text-center text-gray-500">Cargando servicio...</p>
+    return <p className="p-6 text-center text-gray-500">Cargando servicio...</p>
   }
 
   return (
-    <div className="p-4 max-w-3xl mx-auto">
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="p-6 max-w-3xl mx-auto"
+    >
       {/* Imagen */}
-      <div className="aspect-video mb-6">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 0.2 }}
+        className="aspect-video mb-6"
+      >
         <img
           src={service.image_url || '/placeholder.jpg'}
           alt={service.name}
           className="rounded border object-cover w-full h-full"
         />
-      </div>
+      </motion.div>
 
       {/* Info principal */}
       <h1 className="text-3xl font-bold mt-2 text-[#002147] font-poppins">{service.name}</h1>
@@ -74,9 +86,10 @@ export default function ServicePage({ params }) {
                 href={`https://wa.me/${service.emprendimiento.emprendedor.phone_number}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-green-600 underline"
+                className="text-green-600 underline flex gap-2"
               >
-                Contactar por WhatsApp
+                <img src="/whatsapp.png" alt="WhatsApp" className="w-5 h-5" />
+                <span>Contactar por WhatsApp</span>
               </a>
             </p>
           )}
@@ -87,9 +100,10 @@ export default function ServicePage({ params }) {
                 href={`https://instagram.com/${service.emprendimiento.instagram.replace('@', '')}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-pink-600 underline"
+                className="text-pink-600 underline flex gap-2"
               >
-                Ver en Instagram
+                <img src="/instagram.png" alt="Instagram" className="w-5 h-5" />
+                <span>Ver en Instagram</span>
               </a>
             </p>
           )}
@@ -99,6 +113,6 @@ export default function ServicePage({ params }) {
       <Link href="/services" className="inline-block mt-6 text-blue-600 underline">
         ← Volver a servicios
       </Link>
-    </div>
+    </motion.div>
   )
 }

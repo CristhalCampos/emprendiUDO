@@ -2,14 +2,15 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { supabase } from './lib/supabase'
+import { motion } from 'framer-motion'
 import ServiceList from '../components/ServiceList'
+import ProductList from '../components/ProductList'
 import EntrepreneurCarousel from '../components/EntrepreneurCarousel'
 
 export default function Home() {
   const [entrepreneurs, setEntrepreneurs] = useState([])
   const [products, setProducts] = useState([])
   const [services, setServices] = useState([])
-  const [presentationSlides, setPresentationSlides] = useState({})
 
   useEffect(() => {
     const fetchData = async () => {
@@ -55,7 +56,6 @@ export default function Home() {
         setEntrepreneurs(emprendedores || [])
         setProducts(productosConPresentaciones || [])
         setServices(servicios || [])
-        setPresentationSlides(slides)
       } catch (error) {
         console.error('Error al cargar datos:', error)
       }
@@ -64,25 +64,16 @@ export default function Home() {
     fetchData()
   }, [])
 
-  const nextPresentation = (productId, max) => {
-    setPresentationSlides((prev) => ({
-      ...prev,
-      [productId]: (prev[productId] + 1) % max,
-    }))
-  }
-
-  const prevPresentation = (productId, max) => {
-    setPresentationSlides((prev) => ({
-      ...prev,
-      [productId]: (prev[productId] - 1 + max) % max,
-    }))
-  }
-
   return (
     <div>
       {/* Intro para compradores */}
-      <section className="py-10 px-6 bg-[#002147f1] grid grid-cols-1 md:grid-cols-[1fr_35%] gap-4">
-        <div className="flex flex-col justify-center text-center col-span-full md:col-span-2">
+      <section className="py-10 px-6 bg-[#002147] grid grid-cols-1 md:grid-cols-[1fr_35%] gap-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          className="flex flex-col justify-center text-center col-span-full md:col-span-2"
+        >
           <h2 className="text-4xl md:text-5xl font-bold font-poppins text-white mb-4">
             Apoya el talento de la UDO
           </h2>
@@ -103,80 +94,65 @@ export default function Home() {
               Ver Servicios
             </Link>
           </div>
-        </div>
+        </motion.div>
       </section>
 
       {/* Emprendimientos */}
       {entrepreneurs.length > 0 && (
-        <section className="py-10 px-6 max-w-4xl mx-auto text-center">
+        <motion.section
+          className="py-10 px-6 max-w-4xl mx-auto text-center"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+        >
           <h3 className="text-3xl font-semibold font-poppins text-[#002147] mb-6">
             Emprendimientos Destacados
           </h3>
           <EntrepreneurCarousel entrepreneurs={entrepreneurs} />
-        </section>
+        </motion.section>
       )}
 
       {/* Productos */}
-      <section className="py-16 px-6 bg-white">
+      <motion.section
+        className="py-10 px-6 bg-white"
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.8 }}
+      >
         <h3 className="text-3xl font-semibold font-poppins text-center text-[#002147] mb-8">
           Productos Disponibles
         </h3>
-        <div className="grid md:grid-cols-3 justify-items-center gap-6 max-w-6xl mx-auto">
-          {products.length > 0 ? (
-            products.map((p) => {
-              const index = presentationSlides[p.id] || 0
-              const pres = p.presentations[index]
-
-              return (
-                <div key={p.id} className="bg-[#f9f9f9] shadow rounded-lg p-4 w-full">
-                  <div className="relative flex justify-center items-center">
-                    {p.presentations.length > 1 && (
-                      <button
-                        onClick={() => prevPresentation(p.id, p.presentations.length)}
-                        className="absolute left-2 top-1/2 -translate-y-1/2 bg-[#002147] text-white px-2 py-1 rounded-full hover:bg-[#e5a800] transition"
-                      >
-                        ‹
-                      </button>
-                    )}
-                    <img
-                      src={pres?.image_url || '/placeholder.jpg'}
-                      alt={p.name}
-                      className="rounded h-48 w-full object-cover"
-                    />
-                    {p.presentations.length > 1 && (
-                      <button
-                        onClick={() => nextPresentation(p.id, p.presentations.length)}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 bg-[#002147] text-white px-2 py-1 rounded-full hover:bg-[#e5a800] transition"
-                      >
-                        ›
-                      </button>
-                    )}
-                  </div>
-                  <div className="flex flex-col items-center">
-                    <h4 className="font-semibold text-lg text-[#1F2937] mt-4">{p.name}</h4>
-                    <Link
-                      href={`/products/${p.id}`}
-                      className="mt-2 inline-block text-sm bg-[#F5B400] text-[#002147] py-1 px-3 rounded hover:bg-yellow-500 transition"
-                    >
-                      Ver más
-                    </Link>
-                  </div>
-                </div>
-              )
-            })
-          ) : (
-            <p className="text-center col-span-3 text-gray-500">No hay productos disponibles aún.</p>
-          )}
-        </div>
-        <div className="text-center mt-6">
-          <Link href="/products" className="text-[#002147] underline font-semibold">
-            Ver todos los productos
-          </Link>
-        </div>
-      </section>
+        {products.length > 0 ? (
+          <motion.div className="flex flex-col items-center">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+              {products.map((p) => (
+                <ProductList key={p.id} product={p} />
+              ))}
+            </div>
+            <Link
+              href="/products"
+              className="text-[#002147] underline font-semibold mt-4"
+            >
+              Ver todos los productos
+            </Link>
+          </motion.div>
+        ) : (
+          <p className="text-center col-span-3 text-gray-500">
+            No hay productos disponibles aún.
+          </p>
+        )}
+      </motion.section>
 
       {/* Servicios */}
-      <section className="py-16 px-6 bg-[#F5F5F7]">
+      <motion.section
+        className="py-10 px-6 bg-[#F5F5F7]"
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.8 }}
+      >
         <h3 className="text-3xl font-semibold font-poppins text-center text-[#002147] mb-8">
           Servicios Ofrecidos
         </h3>
@@ -185,17 +161,23 @@ export default function Home() {
             <div className="grid md:grid-cols-3 justify-items-center gap-6 max-w-6xl mx-auto">
               <ServiceList services={services} />
             </div>
-            <Link href="/services" className="text-[#002147] underline font-semibold">
+            <Link href="/services" className="text-[#002147] underline font-semibold mt-4">
               Ver todos los servicios
             </Link>
           </div>
         ) : (
           <p className="text-center text-gray-500">No hay servicios disponibles aún.</p>
         )}
-      </section>
+      </motion.section>
 
       {/* CTA final */}
-      <section className="bg-white py-20 px-6 text-center">
+      <motion.section
+        className="bg-white py-20 px-6 text-center"
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.8 }}
+      >
         <h3 className="text-3xl font-semibold font-poppins text-[#002147] mb-4">
           ¿Tienes un emprendimiento?
         </h3>
@@ -208,7 +190,7 @@ export default function Home() {
         >
           Publica tu emprendimiento
         </Link>
-      </section>
+      </motion.section>
     </div>
   )
 }

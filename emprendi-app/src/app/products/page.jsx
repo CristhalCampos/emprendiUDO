@@ -1,8 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { supabase } from '../lib/supabase'
+import { motion } from 'framer-motion'
 
 export default function Page() {
   const [products, setProducts] = useState([])
@@ -13,7 +14,6 @@ export default function Page() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Obtener productos
         const { data: productsData, error: productError } = await supabase
           .from('products')
           .select('id, name')
@@ -22,17 +22,15 @@ export default function Page() {
         if (productError) throw productError
         setProducts(productsData)
 
-        // Obtener presentaciones
         const { data: presentationsData, error: presentationError } = await supabase
           .from('product_presentations')
           .select('id, product_id, label, price, image_url')
-        
+
         if (presentationError) throw presentationError
 
-        // Agrupar presentaciones por producto_id
         const grouped = {}
         const indices = {}
-        presentationsData.forEach(pres => {
+        presentationsData.forEach((pres) => {
           if (!grouped[pres.product_id]) {
             grouped[pres.product_id] = []
             indices[pres.product_id] = 0
@@ -51,14 +49,14 @@ export default function Page() {
   }, [])
 
   const nextImage = (productId) => {
-    setCurrentPresentationIndex(prev => {
+    setCurrentPresentationIndex((prev) => {
       const max = presentationsByProduct[productId]?.length || 1
       return { ...prev, [productId]: (prev[productId] + 1) % max }
     })
   }
 
   const prevImage = (productId) => {
-    setCurrentPresentationIndex(prev => {
+    setCurrentPresentationIndex((prev) => {
       const max = presentationsByProduct[productId]?.length || 1
       return { ...prev, [productId]: (prev[productId] - 1 + max) % max }
     })
@@ -73,21 +71,23 @@ export default function Page() {
   }
 
   return (
-    <div className="p-4 max-w-6xl mx-auto">
+    <div className="p-6 max-w-6xl mx-auto">
       <h1 className="text-3xl font-bold mb-6 text-[#002147] font-poppins">Productos disponibles</h1>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-        {products.map(product => {
+        {products.map((product) => {
           const presentations = presentationsByProduct[product.id] || []
           const currentIndex = currentPresentationIndex[product.id] || 0
           const current = presentations[currentIndex] || {}
 
           return (
-            <div
+            <motion.div
               key={product.id}
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.05 * currentIndex }}
               className="border rounded shadow hover:shadow-lg bg-white overflow-hidden relative"
             >
-              {/* Imagen + slider */}
               <div className="relative aspect-video bg-gray-100 flex items-center justify-center">
                 {presentations.length > 0 ? (
                   <>
@@ -127,7 +127,6 @@ export default function Page() {
                 )}
               </div>
 
-              {/* Info producto */}
               <div className="p-4 flex flex-col items-center">
                 <h2 className="text-xl font-semibold text-[#1F2937]">{product.name}</h2>
                 <Link
@@ -137,7 +136,7 @@ export default function Page() {
                   Ver más
                 </Link>
               </div>
-            </div>
+            </motion.div>
           )
         })}
       </div>

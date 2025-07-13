@@ -2,6 +2,7 @@
 
 import { Disclosure } from '@headlessui/react'
 import { ChevronUpIcon } from '@heroicons/react/20/solid'
+import { motion } from 'framer-motion'
 
 const faqs = [
   {
@@ -47,19 +48,24 @@ export default function Page() {
         {faqs.map((faq, idx) => (
           <Disclosure key={idx}>
             {({ open }) => (
-              <>
-                <Disclosure.Button className="flex justify-between w-full px-4 py-3 text-left text-[#002147] bg-[#F5F5F7] rounded-lg shadow-md hover:bg-gray-100 focus:outline-none focus-visible:ring focus-visible:ring-[#F5B400] font-semibold font-openSans">
+              <div className="rounded-lg shadow-md bg-[#F5F5F7]">
+                <Disclosure.Button className="flex justify-between w-full px-4 py-3 text-left text-[#002147] hover:bg-gray-100 focus:outline-none focus-visible:ring focus-visible:ring-[#F5B400] font-semibold font-openSans">
                   <span>{faq.question}</span>
                   <ChevronUpIcon
                     className={`${
                       open ? 'rotate-180 transform' : ''
-                    } h-5 w-5 text-[#F5B400]`}
+                    } h-5 w-5 text-[#F5B400] transition-transform`}
                   />
                 </Disclosure.Button>
-                <Disclosure.Panel className="px-4 pt-3 pb-5 text-sm text-gray-700 font-openSans">
+                <Disclosure.Panel as={motion.div}
+                  initial={{ opacity: 0, y: -5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="px-4 pt-0 pb-5 text-sm text-gray-700 font-openSans"
+                >
                   {faq.answer}
                 </Disclosure.Panel>
-              </>
+              </div>
             )}
           </Disclosure>
         ))}
