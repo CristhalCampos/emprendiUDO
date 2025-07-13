@@ -12,7 +12,7 @@ export default function ServicePage({ params }) {
   useEffect(() => {
     const fetchService = async () => {
       const { data, error } = await supabase
-        .from('services') // Asegúrate de usar el nombre correcto
+        .from('services')
         .select(`
           *,
           emprendimiento (

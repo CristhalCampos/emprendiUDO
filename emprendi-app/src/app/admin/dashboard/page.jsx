@@ -1,9 +1,10 @@
 'use client'
+
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { supabase } from '@/lib/supabase'
+import { supabase } from '../../lib/supabase'
 
-export default function Dashboard() {
+export default function Page() {
   const [products, setProducts] = useState([])
   const [services, setServices] = useState([])
   const [loading, setLoading] = useState(true)
@@ -18,23 +19,30 @@ export default function Dashboard() {
       } = await supabase.auth.getUser()
 
       if (!user || user.id !== adminUID) {
-        router.push('/') // redirige si no es admin
+        router.push('/') // Redirige si no es admin
         return
       }
 
-      const { data: productos } = await supabase
-        .from('products')
-        .select('id, name, created_at, emprendimiento ( name )')
-        .order('created_at', { ascending: false })
+      try {
+        const { data: prodData, error: prodError } = await supabase
+          .from('products')
+          .select('*')
 
-      const { data: servicios } = await supabase
-        .from('services')
-        .select('id, name, created_at, emprendimiento ( name )')
-        .order('created_at', { ascending: false })
+        if (prodError) throw new Error(prodError.message)
 
-      setProducts(productos || [])
-      setServices(servicios || [])
-      setLoading(false)
+        const { data: servData, error: servError } = await supabase
+          .from('services')
+          .select('*')
+
+        if (servError) throw new Error(servError.message)
+
+        setProducts(prodData || [])
+        setServices(servData || [])
+      } catch (err) {
+        console.error('Error cargando datos:', err.message)
+      } finally {
+        setLoading(false)
+      }
     }
 
     checkAdminAndFetch()
@@ -57,9 +65,6 @@ export default function Dashboard() {
               <li key={p.id} className="bg-white p-4 shadow rounded flex justify-between items-center">
                 <div>
                   <p className="font-bold text-[#002147]">{p.name}</p>
-                  <p className="text-sm text-gray-600">
-                    Emprendimiento: {p.emprendimiento?.name || 'Desconocido'}
-                  </p>
                 </div>
                 <a
                   href={`/products/${p.id}`}
@@ -84,9 +89,6 @@ export default function Dashboard() {
               <li key={s.id} className="bg-white p-4 shadow rounded flex justify-between items-center">
                 <div>
                   <p className="font-bold text-[#002147]">{s.name}</p>
-                  <p className="text-sm text-gray-600">
-                    Emprendimiento: {s.emprendimiento?.name || 'Desconocido'}
-                  </p>
                 </div>
                 <a
                   href={`/services/${s.id}`}
@@ -101,6 +103,16 @@ export default function Dashboard() {
           <p className="text-gray-500">No hay servicios registrados.</p>
         )}
       </section>
+
+      {/* Cerrar sesión */}
+      <div className="mt-10">
+        <button
+          onClick={() => supabase.auth.signOut().then(() => router.push('/'))}
+          className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition"
+        >
+          Cerrar sesión
+        </button>
+      </div>
     </div>
   )
 }
